@@ -14,8 +14,44 @@ choice_url = "http://webs.hufs.ac.kr:8989/src08/jsp/lecture/LECTURE2020L.jsp"
 #테스트: 학부 - 서울 - EICC학과
 class parse_headcount():
     def __init__(self):
+        #시간표 조회에 대한 모든 옵션 가져오기
+        self.current_session = requests.session()
+        
+        self.current_session.get(choice_url,headers=head)
+        self.timetable = self.current_session.get(choice_url,headers=head)
+        html = BeautifulSoup(self.timetable.text, "html.parser")
+
+        year_list = [] #년도
+        session_list = ['1','2','3','4'] #학기
+        school_list = ['A','B','D','E','G','H','I','J','L','M','T'] #A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
+        campus_list = ['H1','H2'] #H1=서울, H2=글로벌
+        gubun_list = ['1','2'] #1=전공/부전공, 2=실용외국어/교양과목
+        major_list = [] #전공 목록
+        liberal_list = [] #교양 목록
+
+        years = html.find_all("select", attrs={"name":"ag_ledg_year"})
+        sessions = html.find_all("select", attrs={"name":"ag_ledgr_sessn"})
+        schools = html.find_all("select", attrs={"name":"ag_org_sect"})
+        majors = html.find_all("select", attrs={"name":"ag_crs_strct_cd"})
+        liberals = html.find_all("select", attrs={"name":"ag_compt_fld_cd"})
+        
+        years = years[0].find_all("option")
+        for year in years:
+            year_list.append(year['value'])
+
+        majors = majors[0].find_all("option")
+        for major in majors:
+            major_list.append(major['value'])
+
+        liberals = liberals[0].find_all("option")
+        for liberal in liberals:
+            liberal_list.append(liberal['value'])
+            
+    def parsing(self):
         self.current_session = requests.session()
 
+        #-----조회할 데이터 옵션 선택-----#
+        
         params={
             'tab_lang':'K',
             'type':'',
@@ -29,8 +65,9 @@ class parse_headcount():
             }
         
         self.current_session.post(choice_url,data=params,headers=head)
-        #self.current_session.get(main_url,headers=head)
 
+        #-----파싱 시작-----#
+        
         self.timetable = self.current_session.post(choice_url,data=params,headers=head)
 
         html = BeautifulSoup(self.timetable.text, "html.parser")
@@ -54,8 +91,17 @@ class parse_headcount():
 
             print(course_name,"|",course_professor,"|",course_time,"|",course_people)
         
+
+        '''옵션의 string을 구하는 코드
+        years = html.find_all("select", attrs={"name":"ag_ledg_year"})
+        years = years[0].get_text()
+        years = years.replace("\xa0","")
+        years = years.split("\n")
+        years = years[1:-1]
+        '''
         
 
 if __name__ == '__main__':
     p = parse_headcount()
+    p.parsing()
     
