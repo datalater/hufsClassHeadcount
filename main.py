@@ -103,20 +103,20 @@ class parse_headcount():
         html = BeautifulSoup(self.timetable.text, "html.parser")
         tr_courses = html.find_all("tr", attrs={"height":"55"})
         for tr_course in tr_courses:
-            course_area = tr_course.find_all("td")[1].string
-            course_year = tr_course.find_all("td")[2].string
-            course_number = tr_course.find_all("td")[3].string
-            course_name = tr_course.find_all("td")[4].get_text()
+            course_area = tr_course.find_all("td")[1].string # 개설영역
+            course_year = tr_course.find_all("td")[2].string # 학년
+            course_number = tr_course.find_all("td")[3].string # 학수번호
+            course_name = tr_course.find_all("td")[4].get_text() # 교과목명
             course_name = course_name.replace("\n","")
             
-            course_professor = tr_course.find_all("td")[10].get_text()
+            course_professor = tr_course.find_all("td")[10].get_text() # 담당교수
             course_professor = course_professor.replace("\r","").replace("\t","").replace("\n","")
 
-            course_time = tr_course.find_all("td")[13].get_text()
+            course_time = tr_course.find_all("td")[13].get_text() # 강의시간
             cut = course_time.find("(")
             course_time = course_time[:cut-1]
 
-            course_people = tr_course.find_all("td")[14].string
+            course_people = tr_course.find_all("td")[14].string # 현재인원
             
 
             print(course_name,"|",course_professor,"|",course_time,"|",course_people)
