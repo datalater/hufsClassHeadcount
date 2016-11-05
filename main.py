@@ -245,7 +245,7 @@ class parse_headcount():
                         'ag_ledgr_sessn':'3', # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
                         'ag_org_sect':'A', # A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
                         'campus_sect':'H1', # H1=서울, H2=글로벌
-                        'gubun':i, # 1=전공/부전공, 2=실용외국어/교양과목
+                        'gubun': self.gubun_list[i], # 1=전공/부전공, 2=실용외국어/교양과목
                         'ag_crs_strct_cd': self.major_list[j], # 전공 목록
                         'ag_compt_fld_cd':'' # 교양 목록
                         }
@@ -258,10 +258,10 @@ class parse_headcount():
 
                     html = BeautifulSoup(self.timetable.text, "html.parser")
                     tr_courses = html.find_all("tr", attrs={"height":"55"})
-                    print("--------테스트3--------")
+                    
 
                     for tr_course in tr_courses:
-                        print("--------테스트4--------")
+                        
                         course_area = tr_course.find_all("td")[1].string # 개설영역
                         course_year = tr_course.find_all("td")[2].string # 학년
                         course_number = tr_course.find_all("td")[3].string # 학수번호
@@ -280,7 +280,6 @@ class parse_headcount():
                         self.course_people = self.course_people.replace("\xa0","")
 
                         self.course_info_list.append([self.course_name, self.course_professor, self.course_time, self.course_people])
-                        print(self.course_info_list)
                         
             else:
                 for k in range(1):
@@ -291,7 +290,7 @@ class parse_headcount():
                         'ag_ledgr_sessn':'3', # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
                         'ag_org_sect':'A', # A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
                         'campus_sect':'H1', # H1=서울, H2=글로벌
-                        'gubun':i, # 1=전공/부전공, 2=실용외국어/교양과목
+                        'gubun': self.gubun_list[i], # 1=전공/부전공, 2=실용외국어/교양과목
                         'ag_crs_strct_cd': '', # 전공 목록
                         'ag_compt_fld_cd': self.liberal_list[k] # 교양 목록
                         }
@@ -432,5 +431,6 @@ if __name__ == '__main__':
     p.all_params()
     p.making_params()
     #p.parsing_major()
-    p.parsing_liberal()
+    #p.parsing_liberal()
+    p.parsing_all()
     
