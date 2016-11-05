@@ -227,6 +227,7 @@ class parse_headcount():
 
         for i in range(len(self.course_info_list)):
             print(self.course_info_list[i])
+
         
     def parsing_all(self):
         self.current_session = requests.session()
@@ -327,7 +328,10 @@ class parse_headcount():
         for i in range(len(self.course_info_list)):
             print(self.course_info_list[i])
 
+
     def parsing(self, params):
+
+        #-----코드를 절약하기 위해 params를 인자로 받아서 파싱만 하는 함수(진행중)-----#
         
         self.current_session.post(timetable_url,data=params,headers=head)
 
