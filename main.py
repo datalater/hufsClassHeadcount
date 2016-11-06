@@ -55,34 +55,12 @@ class parse_headcount():
         self.major_code_list = [] # 전공 코드 목록
         self.liberal_code_list = [] # 교양 코드 목록
         
-        majors = html.find_all("select", attrs={"name":"ag_crs_strct_cd"})
         liberals = html.find_all("select", attrs={"name":"ag_compt_fld_cd"})
-        
-        majors = majors[0].find_all("option")
-        for major in majors:
-            self.major_code_list.append(major['value'])
         
         liberals = liberals[0].find_all("option")
         for liberal in liberals:
             self.liberal_code_list.append(liberal['value'])
-
-        #-----전공에 대한 옵션 중 검색용으로 전공명 가져오기-----#
-
-        self.major_name_list = []
-
-        major_names = html.find_all("select", attrs={"name":"ag_crs_strct_cd"})
-        major_names = major_names[0].find_all("option")
-
-        for major_name in major_names:
-            major_name = major_name.get_text()
-            major_name = major_name.replace('\xa0',"").replace('\r','').replace('\n','').replace('\t','')
-            cut = major_name.find("-")
-            major_name = major_name[cut+1:]
-            cut = major_name.find("(")
-            major_name = major_name[:cut]
-            self.major_name_list.append(major_name)
-
-
+   
         #-----전공 코드(params 데이터)와 전공명 딕셔너리 만들기-----#
 
         self.major_dict = dict()
@@ -91,14 +69,12 @@ class parse_headcount():
         majors = majors[0].find_all("option")
 
         for major in majors:
-
             major_name = major.get_text()
             major_name = major_name.replace('\xa0',"").replace('\r','').replace('\n','').replace('\t','')
             cut = major_name.find("-")
             major_name = major_name[cut+1:]
             cut = major_name.find("(")
             major_name = major_name[:cut]
-            self.major_name_list.append(major_name)
 
             self.major_dict[major_name] = major['value']
 
