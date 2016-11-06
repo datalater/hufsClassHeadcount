@@ -45,33 +45,32 @@ class parse_headcount():
         
         self.default_year = all_option[0]['value'] # 해당연도
         self.default_session = all_option[1]['value'] # 해당학기
-        self.default_school = all_option[2]['value'] # 학부
+        self.default_school = 'A' # 학부
         self.default_campus = 'H1' # 서울캠퍼스
 
         #-----default 옵션을 제외한 나머지 옵션 가져오기-----#
 
         
         self.gubun_list = ['1','2'] # 1=전공/부전공, 2=실용외국어/교양과목
-        self.major_list = [] # 전공 목록
-        self.liberal_list = [] # 교양 목록
+        self.major_code_list = [] # 전공 코드 목록
+        self.liberal_code_list = [] # 교양 코드 목록
         
         majors = html.find_all("select", attrs={"name":"ag_crs_strct_cd"})
         liberals = html.find_all("select", attrs={"name":"ag_compt_fld_cd"})
         
         majors = majors[0].find_all("option")
         for major in majors:
-            self.major_list.append(major['value'])
+            self.major_code_list.append(major['value'])
         
         liberals = liberals[0].find_all("option")
         for liberal in liberals:
-            self.liberal_list.append(liberal['value'])
+            self.liberal_code_list.append(liberal['value'])
 
         #-----전공에 대한 옵션 중 검색용으로 전공명 가져오기-----#
 
         self.major_name_list = []
 
         major_names = html.find_all("select", attrs={"name":"ag_crs_strct_cd"})
-
         major_names = major_names[0].find_all("option")
 
         for major_name in major_names:
@@ -82,6 +81,29 @@ class parse_headcount():
             cut = major_name.find("(")
             major_name = major_name[:cut]
             self.major_name_list.append(major_name)
+
+
+        #-----전공 코드(params 데이터)와 전공명 딕셔너리 만들기-----#
+
+        self.major_dict = dict()
+
+        majors = html.find_all("select", attrs={"name":"ag_crs_strct_cd"})
+        majors = majors[0].find_all("option")
+
+        for major in majors:
+
+            major_name = major.get_text()
+            major_name = major_name.replace('\xa0',"").replace('\r','').replace('\n','').replace('\t','')
+            cut = major_name.find("-")
+            major_name = major_name[cut+1:]
+            cut = major_name.find("(")
+            major_name = major_name[:cut]
+            self.major_name_list.append(major_name)
+
+            self.major_dict[major_name] = major['value']
+
+        print(self.major_dict)
+
         
     def parsing_all(self):
         self.current_session = requests.session()
@@ -92,7 +114,7 @@ class parse_headcount():
 
         for i in range(len(self.gubun_list)):
             if  i == 0:
-                for j in range(2):
+                for j in range(len(self.major_code_list)):
                     params ={
                         'tab_lang':'K',
                         'type':'',
@@ -101,13 +123,13 @@ class parse_headcount():
                         'ag_org_sect':'A', # A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
                         'campus_sect':'H1', # H1=서울, H2=글로벌
                         'gubun': self.gubun_list[i], # 1=전공/부전공, 2=실용외국어/교양과목
-                        'ag_crs_strct_cd': self.major_list[j], # 전공 목록
+                        'ag_crs_strct_cd': self.major_code_list[j], # 전공 목록
                         'ag_compt_fld_cd':'' # 교양 목록
                         }
 
-                    self.major_list = list(self.parsing(params))
+                    self.major_data = list(self.parsing(params))
             else:
-                for k in range(1):
+                for k in range(len(self.liberal_code_list)):
                     params ={
                         'tab_lang':'K',
                         'type':'',
@@ -117,25 +139,28 @@ class parse_headcount():
                         'campus_sect':'H1', # H1=서울, H2=글로벌
                         'gubun': self.gubun_list[i], # 1=전공/부전공, 2=실용외국어/교양과목
                         'ag_crs_strct_cd': '', # 전공 목록
-                        'ag_compt_fld_cd': self.liberal_list[k] # 교양 목록
+                        'ag_compt_fld_cd': self.liberal_code_list[k] # 교양 목록
                         }
 
-                    self.liberal_list = list(self.parsing(params))
+                    self.liberal_data = list(self.parsing(params))
 
-        self.all_list = self.major_list + self.liberal_list
+        self.all_data = self.major_data + self.liberal_data
 
-        for i in range(len(self.all_list)):
-            print(self.all_list[i])
+        #for i in range(len(self.all_list)):
+        #    print(self.all_list[i])
 
 
-    def parsing_major(self):
+    def parsing_major_name(self):
+
+        #-----전공을 인자로 받아서 전공별로 파싱-----#
+
         self.current_session = requests.session()
 
         #-----조회할 데이터 옵션 선택-----#
 
         self.course_info_list = list()
 
-        major_list = []
+        major_code_list = []
 
 
     def parsing(self, params):
