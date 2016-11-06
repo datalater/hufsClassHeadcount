@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 import re
 
 
-#구현되어야 할 기능, 모든 학부 & 교양 데이터 받아오기
+#구현되어야 할 기능, 모든 학부 & 교양 데이터 받아오기            [finished] def parsing_all
 #전공을 인자로 받아서 전공별로 데이터를 받아오는 기능
 #모델의 검색 시간을 보고 과목 선별적으로 데이터를 받아오는 기능
 #
@@ -66,153 +66,22 @@ class parse_headcount():
         for liberal in liberals:
             self.liberal_list.append(liberal['value'])
 
-        # print(len(major_list))    # 서울 전공개수 73개
-        # print(len(liberal_list))  # 서울 교양개수 15개
+        #-----전공에 대한 옵션 중 검색용으로 전공명 가져오기-----#
 
-    def making_params(self):
-        
-        #-----params dictionary 리스트 만들기-----#
+        self.major_name_list = []
 
-        self.params_list = []
-        
-        params_keys = ['tab_lang','type','ag_ledg_year','ag_ledgr_sessn','ag_org_sect','campus_sect','gubun','ag_crs_strct_cd','ag_compt_fld_cd']
-        params_values = ['K','','','','','','','','']
-        
-        params_values[2] = self.default_year
-        params_values[3] = self.default_session
-        params_values[4] = self.default_school
-        params_values[5] = 'H1'
-               
-        number_of_cases = len(self.gubun_list)*len(self.major_list)*len(self.liberal_list)
-        #print(number_of_cases)
+        major_names = html.find_all("select", attrs={"name":"ag_crs_strct_cd"})
 
-        self.params_values_dictionary = dict() # params의 value값 딕셔너리
-        
-        for i in range(len(self.gubun_list)):
-            if i==0:
-                params_values[6] = self.gubun_list[i]
-                
-                for j in range(len(self.major_list)):
-                    params_values[7] = self.major_list[j]
-                    self.params_values_dictionary[j] = list(params_values)
-            else:
-                params_values[6] = self.gubun_list[i]
-                params_values[7] = ''
-                
-                for k in range(len(self.liberal_list)):
-                    params_values[8] = self.liberal_list[k]
-                    self.params_values_dictionary[j+k] = list(params_values)
+        major_names = major_names[0].find_all("option")
 
-
-    def parsing_major(self):
-        self.current_session = requests.session()
-
-        #-----조회할 데이터 옵션 선택-----#
-
-        self.course_info_list = list()
-
-        for i in range(len(self.major_list)):
-            params={
-                'tab_lang':'K',
-                'type':'',
-                'ag_ledg_year':'2016', # 년도
-                'ag_ledgr_sessn':'3', # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
-                'ag_org_sect':'A', # A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
-                'campus_sect':'H1', # H1=서울, H2=글로벌
-                'gubun':'1', # 1=전공/부전공, 2=실용외국어/교양과목
-                'ag_crs_strct_cd':self.major_list[i], # 전공 목록
-                'ag_compt_fld_cd':'301_H1' # 교양 목록
-                }
-            
-            self.current_session.post(timetable_url,data=params,headers=head)
-
-            #-----파싱 시작-----#
-            
-            self.timetable = self.current_session.post(timetable_url,data=params,headers=head)
-
-            html = BeautifulSoup(self.timetable.text, "html.parser")
-            tr_courses = html.find_all("tr", attrs={"height":"55"})
-
-            
-            
-            for tr_course in tr_courses:
-                course_area = tr_course.find_all("td")[1].string # 개설영역
-                course_year = tr_course.find_all("td")[2].string # 학년
-                course_number = tr_course.find_all("td")[3].string # 학수번호
-
-                self.course_name = tr_course.find_all("td")[4].get_text() # 교과목명
-                self.course_name = self.course_name.replace("\n","")
-                
-                self.course_professor = tr_course.find_all("td")[10].get_text() # 담당교수
-                self.course_professor = self.course_professor.replace("\r","").replace("\t","").replace("\n","")
-
-                self.course_time = tr_course.find_all("td")[13].get_text() # 강의시간
-                cut = self.course_time.find("(")
-                self.course_time = self.course_time[:cut-1]
-                
-                self.course_people = tr_course.find_all("td")[14].string # 현재인원
-                self.course_people = self.course_people.replace("\xa0","")
-                
-
-                self.course_info_list.append([self.course_name, self.course_professor, self.course_time, self.course_people])
-
-        for i in range(len(self.course_info_list)):
-            print(self.course_info_list[i])
-
-
-    def parsing_liberal(self):
-        self.current_session = requests.session()
-
-        #-----조회할 데이터 옵션 선택-----#
-
-        self.course_info_list = list()
-
-        for i in range(len(self.liberal_list)):
-            params={
-                'tab_lang':'K',
-                'type':'',
-                'ag_ledg_year':'2016', # 년도
-                'ag_ledgr_sessn':'3', # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
-                'ag_org_sect':'A', # A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
-                'campus_sect':'H1', # H1=서울, H2=글로벌
-                'gubun':'2', # 1=전공/부전공, 2=실용외국어/교양과목
-                'ag_crs_strct_cd':'', # 전공 목록
-                'ag_compt_fld_cd':self.liberal_list[i] # 교양 목록
-                }
-            
-            self.current_session.post(timetable_url,data=params,headers=head)
-
-            #-----파싱 시작-----#
-            
-            self.timetable = self.current_session.post(timetable_url,data=params,headers=head)
-
-            html = BeautifulSoup(self.timetable.text, "html.parser")
-            tr_courses = html.find_all("tr", attrs={"height":"55"})
-            
-            for tr_course in tr_courses:
-                course_area = tr_course.find_all("td")[1].string # 개설영역
-                course_year = tr_course.find_all("td")[2].string # 학년
-                course_number = tr_course.find_all("td")[3].string # 학수번호
-
-                self.course_name = tr_course.find_all("td")[4].get_text() # 교과목명
-                self.course_name = self.course_name.replace("\n","")
-                
-                self.course_professor = tr_course.find_all("td")[10].get_text() # 담당교수
-                self.course_professor = self.course_professor.replace("\r","").replace("\t","").replace("\n","")
-
-                self.course_time = tr_course.find_all("td")[13].get_text() # 강의시간
-                cut = self.course_time.find("(")
-                self.course_time = self.course_time[:cut-1]
-                
-                self.course_people = tr_course.find_all("td")[14].string # 현재인원
-                self.course_people = self.course_people.replace("\xa0","")
-                
-
-                self.course_info_list.append([self.course_name, self.course_professor, self.course_time, self.course_people])
-
-        for i in range(len(self.course_info_list)):
-            print(self.course_info_list[i])
-
+        for major_name in major_names:
+            major_name = major_name.get_text()
+            major_name = major_name.replace('\xa0',"").replace('\r','').replace('\n','').replace('\t','')
+            cut = major_name.find("-")
+            major_name = major_name[cut+1:]
+            cut = major_name.find("(")
+            major_name = major_name[:cut]
+            self.major_name_list.append(major_name)
         
     def parsing_all(self):
         self.current_session = requests.session()
@@ -221,8 +90,7 @@ class parse_headcount():
 
         self.course_info_list = list()
 
-        #for i in range(len(self.gubun_list)):
-        for i in range(2):
+        for i in range(len(self.gubun_list)):
             if  i == 0:
                 for j in range(2):
                     params ={
@@ -260,9 +128,19 @@ class parse_headcount():
             print(self.all_list[i])
 
 
+    def parsing_major(self):
+        self.current_session = requests.session()
+
+        #-----조회할 데이터 옵션 선택-----#
+
+        self.course_info_list = list()
+
+        major_list = []
+
+
     def parsing(self, params):
 
-        #-----코드를 절약하기 위해 params를 인자로 받아서 파싱만 하는 함수(진행중)-----#
+        #-----params를 인자로 받아서 파싱하는 함수-----#
         
         self.current_session.post(timetable_url,data=params,headers=head)
 
@@ -298,109 +176,7 @@ class parse_headcount():
         return self.parsing_data
 
 
-    def parsing_example(self):
-        self.current_session = requests.session()
-
-        #-----조회할 데이터 옵션 선택-----#
-        
-        params={
-            'tab_lang':'K',
-            'type':'',
-            'ag_ledg_year':'2016', # 년도
-            'ag_ledgr_sessn':'3', # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
-            'ag_org_sect':'A', # A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
-            'campus_sect':'H1', # H1=서울, H2=글로벌
-            'gubun':'1', # 1=전공/부전공, 2=실용외국어/교양과목
-            'ag_crs_strct_cd':'A1CE1_H1', # 전공 목록
-            'ag_compt_fld_cd':'301_H1' # 교양 목록
-            }
-        
-        self.current_session.post(timetable_url,data=params,headers=head)
-
-        #-----파싱 시작-----#
-        
-        self.timetable = self.current_session.post(timetable_url,data=params,headers=head)
-
-        html = BeautifulSoup(self.timetable.text, "html.parser")
-        tr_courses = html.find_all("tr", attrs={"height":"55"})
-
-        self.course_info_list = list()
-        
-        for tr_course in tr_courses:
-            course_area = tr_course.find_all("td")[1].string # 개설영역
-            course_year = tr_course.find_all("td")[2].string # 학년
-            course_number = tr_course.find_all("td")[3].string # 학수번호
-
-            self.course_name = tr_course.find_all("td")[4].get_text() # 교과목명
-            self.course_name = self.course_name.replace("\n","")
-            
-            self.course_professor = tr_course.find_all("td")[10].get_text() # 담당교수
-            self.course_professor = self.course_professor.replace("\r","").replace("\t","").replace("\n","")
-
-            self.course_time = tr_course.find_all("td")[13].get_text() # 강의시간
-            cut = self.course_time.find("(")
-            self.course_time = self.course_time[:cut-1]
-            
-            self.course_people = tr_course.find_all("td")[14].string # 현재인원
-            self.course_people = self.course_people.replace("\xa0","")
-            
-
-            self.course_info_list.append([self.course_name, self.course_professor, self.course_time, self.course_people])
-
-        for i in range(len(self.course_info_list)):
-            print(self.course_info_list[i])
-
-
-
-        '''
-    def all_params(self):
-        
-        #####-----모든 옵션이 아닌 서울캠퍼스의 학부만 하는 것으로 방향 변경하여 주석처리-----#
-
-        #-----시간표 조회에 대한 모든 옵션 가져오기-----#
-        
-        self.current_session = requests.session()
-        
-        self.current_session.get(timetable_url,headers=head)
-        self.timetable = self.current_session.get(timetable_url,headers=head)
-        html = BeautifulSoup(self.timetable.text, "html.parser")
-
-        # default에 주의
-        self.year_list = [] # 년도
-        self.session_list = ['1','2','3','4'] # 학기
-        self.school_list = ['A','B','D','E','G','H','I','J','L','M','T'] # A=학부(default), B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
-        self.campus_list = ['H1','H2'] # H1=서울(default), H2=글로벌
-        self.gubun_list = ['1','2'] # 1=전공/부전공, 2=실용외국어/교양과목
-        self.major_list = [] # 전공 목록
-        self.liberal_list = [] # 교양 목록
-        
-        years = html.find_all("select", attrs={"name":"ag_ledg_year"})
-        sessions = html.find_all("select", attrs={"name":"ag_ledgr_sessn"})
-        schools = html.find_all("select", attrs={"name":"ag_org_sect"})
-        majors = html.find_all("select", attrs={"name":"ag_crs_strct_cd"})
-        liberals = html.find_all("select", attrs={"name":"ag_compt_fld_cd"})
-        
-        years = years[0].find_all("option")
-        for year in years:
-            self.year_list.append(year['value'])
-
-        majors = majors[0].find_all("option")
-        for major in majors:
-            self.major_list.append(major['value'])
-        
-        liberals = liberals[0].find_all("option")
-        for liberal in liberals:
-            self.liberal_list.append(liberal['value'])
-
-        # print(len(major_list))    # 서울 전공개수 73개
-        # print(len(liberal_list))  # 서울 교양개수 15개
-        '''
-        
-
 if __name__ == '__main__':
     p = parse_headcount()
-    #p.making_params()
-    #p.parsing_major()
-    #p.parsing_liberal()
-    p.parsing_all()
+    #p.parsing_all()
     
