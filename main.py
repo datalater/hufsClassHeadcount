@@ -39,16 +39,10 @@ class parsing_class():
 
         self.default_year = now.year
 
-        if now.month >= 12 and now.day > 20:
-            self.default_session = '4'
-        elif now.month >=8:
+        if now.month >=8:
             self.default_session = '3'
-        elif now.month >= 6 and now.day > 20:
-            self.default_session = '2'
-        elif now.month >=2:
-            self.default_session = '1'
         else:
-            self.default_session = '4'
+            self.default_session = '1'
 
         #-----학부, 서울 캠퍼스-----#
         
@@ -91,6 +85,7 @@ class parsing_class():
             self.major_dict[major_name] = major['value']
 
         self.major_key = list(self.major_dict.keys())
+        self.major_code_list = list(self.major_dict.values())
         
     def parsing_all(self):
 
@@ -108,8 +103,8 @@ class parsing_class():
                     params ={
                         'tab_lang':'K',
                         'type':'',
-                        'ag_ledg_year':'2016', # 년도
-                        'ag_ledgr_sessn':'3', # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
+                        'ag_ledg_year': self.default_year, # 년도
+                        'ag_ledgr_sessn': self.default_session, # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
                         'ag_org_sect':'A', # A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
                         'campus_sect':'H1', # H1=서울, H2=글로벌
                         'gubun': self.gubun_list[i], # 1=전공/부전공, 2=실용외국어/교양과목
@@ -123,8 +118,8 @@ class parsing_class():
                     params ={
                         'tab_lang':'K',
                         'type':'',
-                        'ag_ledg_year':'2016', # 년도
-                        'ag_ledgr_sessn':'3', # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
+                        'ag_ledg_year': self.default_year, # 년도
+                        'ag_ledgr_sessn': self.default_session, # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
                         'ag_org_sect':'A', # A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
                         'campus_sect':'H1', # H1=서울, H2=글로벌
                         'gubun': self.gubun_list[i], # 1=전공/부전공, 2=실용외국어/교양과목
@@ -136,6 +131,7 @@ class parsing_class():
 
         self.all_data = self.major_data + self.liberal_data
 
+        print(self.all_data)
 
     def parsing_major_name(self, major_name):
 
@@ -208,5 +204,7 @@ class parsing_class():
 
 if __name__ == '__main__':
     p = parsing_class()
-    #p.parsing_all()
+    p.parsing_all()
+    #p.parsing_major_name('영문학과')
+    
     
