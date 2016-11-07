@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from datetime import date
 
 import re
 
@@ -32,24 +33,36 @@ class parsing_class():
 
         ######-----시간표 url의 params 데이터를 실시간으로 반영하는 초기화 함수-----#####
         
-        #-----params의 default 옵션(해당연도, 해당학기) 가져오기-----#
+        #-----today()로 해당연도, 해당학기 구하기-----#
+
+        now = date.today()
+
+        self.default_year = now.year
+
+        if now.month >= 12 and now.day > 20:
+            self.default_session = '4'
+        elif now.month >=8:
+            self.default_session = '3'
+        elif now.month >= 6 and now.day > 20:
+            self.default_session = '2'
+        elif now.month >=2:
+            self.default_session = '1'
+        else:
+            self.default_session = '4'
+
+        #-----학부, 서울 캠퍼스-----#
         
+        self.default_school = 'A' # 학부
+        self.default_campus = 'H1' # 서울캠퍼스
+
+        #-----default 옵션을 제외한 나머지 옵션 가져오기-----#
+
         self.current_session = requests.session()
         
         self.current_session.get(timetable_url,headers=head)
         self.timetable = self.current_session.get(timetable_url,headers=head)
         html = BeautifulSoup(self.timetable.text, "html.parser")
 
-        all_option = html.find_all("option", selected=True)
-        
-        self.default_year = all_option[0]['value'] # 해당연도
-        self.default_session = all_option[1]['value'] # 해당학기
-        self.default_school = 'A' # 학부
-        self.default_campus = 'H1' # 서울캠퍼스
-
-        #-----default 옵션을 제외한 나머지 옵션 가져오기-----#
-
-        
         self.gubun_list = ['1','2'] # 1=전공/부전공, 2=실용외국어/교양과목
         self.major_code_list = [] # 전공 코드 목록
         self.liberal_code_list = [] # 교양 코드 목록
@@ -147,8 +160,6 @@ class parsing_class():
             }
 
         self.major_name_data = list(self.parsing(params))
-
-        print(self.major_name_data)
 
     def parsing(self, params):
 
