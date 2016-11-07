@@ -23,6 +23,9 @@ import re
 # parsing_major_name(self, major_name): 전공이름을 인자로 받아 전공 데이터 파싱을 위한 params 생성
 # parsing(self, params): params 데이터를 인자로 받아 데이터 파싱
 #
+# * 소요 시간
+# 전체 : 131s
+# 교양 : 31s
 #---------------------------------------------------------------------------------------------------------#
 
 
@@ -153,7 +156,6 @@ class parsing_class():
         #-----조회할 데이터 옵션 선택-----#
 
         self.course_info_list = list()
-        
 
         if major_name in list(self.major_dict.keys()):
             params ={
@@ -184,9 +186,6 @@ class parsing_class():
                 }
 
             self.major_name_data = list(self.parsing(params))
-
-        print(self.major_name_data)
-
 
     def parsing(self, params):
 
@@ -235,7 +234,7 @@ class parsing_class():
 
 if __name__ == '__main__':
     p = parsing_class()
-    #p.parsing_all()
-    p.parsing_major_name('실용외국어')
+    p.parsing_all()
+    #p.parsing_major_name('실용외국어')
     
     
