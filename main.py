@@ -185,6 +185,8 @@ class parsing_class():
 
             self.major_name_data = list(self.parsing(params))
 
+        print(self.major_name_data)
+
 
     def parsing(self, params):
 
@@ -234,6 +236,6 @@ class parsing_class():
 if __name__ == '__main__':
     p = parsing_class()
     #p.parsing_all()
-    p.parsing_major_name('군사학')
+    p.parsing_major_name('실용외국어')
     
     
