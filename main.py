@@ -91,7 +91,7 @@ class parsing_class():
 
         ######-----학부내 모든 전공 및 교양 데이터 파싱-----#####
 
-        self.current_session = requests.session()
+        #self.current_session = requests.session()
 
         #-----조회할 데이터 옵션 선택-----#
 
@@ -131,13 +131,11 @@ class parsing_class():
 
         self.all_data = self.major_data + self.liberal_data
 
-        print(self.all_data)
-
     def parsing_major_name(self, major_name):
 
         #-----전공을 인자로 받아서 전공별로 파싱-----#
 
-        self.current_session = requests.session()
+        #self.current_session = requests.session()
 
         #-----조회할 데이터 옵션 선택-----#
 
