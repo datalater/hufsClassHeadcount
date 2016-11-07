@@ -18,9 +18,10 @@ import re
 #
 #
 # * 함수 설명
-# __init__(self): 시간표 조회에 대한 모든 검색옵션 파싱 (단, 옵션의 default값인 학부, 서울캠퍼스는 고정)
-# making_params(self): 모든 검색 옵션을 담은 params 리스트 만들기
-# parsing(self): 모든 검색 옵션이 담긴 params 리스트를 iterate하여 post로 보내고, 수업별 현재인원 파싱
+# __init__(self): 전공 및 교양 목록 데이터 파싱
+# parsing_all(self): 학부 내 모든 전공 & 교양 데이터 파싱을 위한 params 생성
+# parsing_major_name(self, major_name): 전공이름을 인자로 받아 전공 데이터 파싱을 위한 params 생성
+# parsing(self, params): params 데이터를 인자로 받아 데이터 파싱
 #
 #---------------------------------------------------------------------------------------------------------#
 
