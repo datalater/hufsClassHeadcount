@@ -56,7 +56,7 @@ class parsing_class():
         
         self.current_session.get(timetable_url,headers=head)
         self.timetable = self.current_session.get(timetable_url,headers=head)
-        html = BeautifulSoup(self.timetable.text, "html.parser")
+        html = BeautifulSoup(self.timetable.text, "lxml")
 
         self.gubun_list = ['1','2'] # 1=전공/부전공, 2=실용외국어/교양과목
         self.major_code_list = [] # 전공 코드 목록
@@ -71,9 +71,12 @@ class parsing_class():
         #-----전공 코드(params 데이터)와 전공명 딕셔너리 만들기-----#
 
         self.major_dict = dict()
+        self.liberal_dict = dict()
 
         majors = html.find_all("select", attrs={"name":"ag_crs_strct_cd"})
         majors = majors[0].find_all("option")
+        liberals = html.find_all("select", attrs={"name":"ag_compt_fld_cd"})
+        liberals = liberals[0].find_all("option")
 
         for major in majors:
             major_name = major.get_text()
@@ -88,6 +91,19 @@ class parsing_class():
         self.major_key = list(self.major_dict.keys())
         self.major_code_list = list(self.major_dict.values())
         
+        for liberal in liberals:
+            liberal_name = liberal.get_text()
+            liberal_name = liberal_name.replace('\xa0',"").replace('\r','').replace('\n','').replace('\t','')
+            cut_count = liberal_name.count("(")
+            for i in range(cut_count):
+                cut = liberal_name.rfind("(")
+                liberal_name = liberal_name[:cut]
+
+            self.liberal_dict[liberal_name] = liberal['value']
+
+        self.liberal_key = list(self.liberal_dict.keys())
+        self.liberal_code_list = list(self.liberal_dict.values())
+
     def parsing_all(self):
 
         ######-----학부내 모든 전공 및 교양 데이터 파싱-----#####
@@ -134,27 +150,41 @@ class parsing_class():
 
     def parsing_major_name(self, major_name):
 
-        #-----전공을 인자로 받아서 전공별로 파싱-----#
-
-        #self.current_session = requests.session()
-
         #-----조회할 데이터 옵션 선택-----#
 
         self.course_info_list = list()
+        
 
-        params ={
-            'tab_lang':'K',
-            'type':'',
-            'ag_ledg_year':'2016', # 년도
-            'ag_ledgr_sessn':'3', # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
-            'ag_org_sect':'A', # A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
-            'campus_sect':'H1', # H1=서울, H2=글로벌
-            'gubun': '1', # 1=전공/부전공, 2=실용외국어/교양과목
-            'ag_crs_strct_cd': self.major_dict[major_name], # 전공 목록
-            'ag_compt_fld_cd': '' # 교양 목록
-            }
+        if major_name in list(self.major_dict.keys()):
+            params ={
+                'tab_lang':'K',
+                'type':'',
+                'ag_ledg_year': self.default_year, # 년도
+                'ag_ledgr_sessn':self.default_session, # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
+                'ag_org_sect':'A', # A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
+                'campus_sect':'H1', # H1=서울, H2=글로벌
+                'gubun': '1', # 1=전공/부전공, 2=실용외국어/교양과목
+                'ag_crs_strct_cd': self.major_dict[major_name], # 전공 목록
+                'ag_compt_fld_cd': '' # 교양 목록
+                }
 
-        self.major_name_data = list(self.parsing(params))
+            self.major_name_data = list(self.parsing(params))
+        
+        else:
+            params ={
+                'tab_lang':'K',
+                'type':'',
+                'ag_ledg_year':self.default_year, # 년도
+                'ag_ledgr_sessn':self.default_session, # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
+                'ag_org_sect':'A', # A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
+                'campus_sect':'H1', # H1=서울, H2=글로벌
+                'gubun': '2', # 1=전공/부전공, 2=실용외국어/교양과목
+                'ag_crs_strct_cd': '', # 전공 목록
+                'ag_compt_fld_cd': self.liberal_dict[major_name] # 교양 목록
+                }
+
+            self.major_name_data = list(self.parsing(params))
+
 
     def parsing(self, params):
 
@@ -166,7 +196,7 @@ class parsing_class():
         
         self.timetable = self.current_session.post(timetable_url,data=params,headers=head)
 
-        html = BeautifulSoup(self.timetable.text, "html.parser")
+        html = BeautifulSoup(self.timetable.text, "lxml")
         tr_courses = html.find_all("tr", attrs={"height":"55"})
         
         for tr_course in tr_courses:
@@ -203,7 +233,7 @@ class parsing_class():
 
 if __name__ == '__main__':
     p = parsing_class()
-    p.parsing_all()
-    #p.parsing_major_name('영문학과')
+    #p.parsing_all()
+    p.parsing_major_name('군사학')
     
     
