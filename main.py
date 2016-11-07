@@ -32,7 +32,7 @@ class parsing_class():
 
         ######-----시간표 url의 params 데이터를 실시간으로 반영하는 초기화 함수-----#####
         
-        #-----params의 default 옵션(해당연도, 해당학기, 학부, 서울캠퍼스) 가져오기-----#
+        #-----params의 default 옵션(해당연도, 해당학기) 가져오기-----#
         
         self.current_session = requests.session()
         
@@ -80,6 +80,9 @@ class parsing_class():
         self.major_key = list(self.major_dict.keys())
         
     def parsing_all(self):
+
+        ######-----학부내 모든 전공 및 교양 데이터 파싱-----#####
+
         self.current_session = requests.session()
 
         #-----조회할 데이터 옵션 선택-----#
@@ -149,7 +152,7 @@ class parsing_class():
 
     def parsing(self, params):
 
-        #-----params를 인자로 받아서 파싱하는 함수-----#
+        #####-----params를 인자로 받아서 파싱하는 함수-----#####
         
         self.current_session.post(timetable_url,data=params,headers=head)
 
