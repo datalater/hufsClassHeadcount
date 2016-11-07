@@ -5,7 +5,7 @@ import re
 
 
 #구현되어야 할 기능, 모든 학부 & 교양 데이터 받아오기            [finished] def parsing_all
-#전공을 인자로 받아서 전공별로 데이터를 받아오는 기능
+#전공을 인자로 받아서 전공별로 데이터를 받아오는 기능              [finished] def parsing_major_name
 #모델의 검색 시간을 보고 과목 선별적으로 데이터를 받아오는 기능
 #
 #---------------------------------------------------------------------------------------------------------#
@@ -167,9 +167,16 @@ class parsing_class():
 
             self.course_name = tr_course.find_all("td")[4].get_text() # 교과목명
             self.course_name = self.course_name.replace("\n","")
+            cut_count = self.course_name.count("(")
+            for i in range(cut_count):
+                cut = self.course_name.rfind("(")
+                self.course_name = self.course_name[:cut]
             
             self.course_professor = tr_course.find_all("td")[10].get_text() # 담당교수
             self.course_professor = self.course_professor.replace("\r","").replace("\t","").replace("\n","")
+            cut = self.course_professor.rfind("(")
+            if cut!=-1:
+                self.course_professor = self.course_professor[:cut]
 
             self.course_time = tr_course.find_all("td")[13].get_text() # 강의시간
             cut = self.course_time.find("(")
