@@ -27,8 +27,7 @@ import re
 head={'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36'}
 timetable_url = "http://webs.hufs.ac.kr:8989/src08/jsp/lecture/LECTURE2020L.jsp"
 
-#테스트: 학부 - 서울 - EICC학과
-class parse_headcount():
+class parsing_class():
     def __init__(self):
 
         ######-----시간표 url의 params 데이터를 실시간으로 반영하는 초기화 함수-----#####
@@ -78,8 +77,7 @@ class parse_headcount():
 
             self.major_dict[major_name] = major['value']
 
-        print(self.major_dict)
-
+        self.major_key = list(self.major_dict.keys())
         
     def parsing_all(self):
         self.current_session = requests.session()
@@ -122,11 +120,8 @@ class parse_headcount():
 
         self.all_data = self.major_data + self.liberal_data
 
-        #for i in range(len(self.all_list)):
-        #    print(self.all_list[i])
 
-
-    def parsing_major_name(self):
+    def parsing_major_name(self, major_name):
 
         #-----전공을 인자로 받아서 전공별로 파싱-----#
 
@@ -136,8 +131,21 @@ class parse_headcount():
 
         self.course_info_list = list()
 
-        major_code_list = []
+        params ={
+            'tab_lang':'K',
+            'type':'',
+            'ag_ledg_year':'2016', # 년도
+            'ag_ledgr_sessn':'3', # 1=1학기, 2=여름계절, 3=2학기, 4=겨울계절
+            'ag_org_sect':'A', # A=학부, B=대학원, D=통번역대학원, E=교육대학원, G=정치행정언론대학원, H=국제지역대학원, I=경영대학원(주간), J=경영대학원(야간), L=법학전문대학원, M=TESOL대학원, T=TESOL전문교육원
+            'campus_sect':'H1', # H1=서울, H2=글로벌
+            'gubun': '1', # 1=전공/부전공, 2=실용외국어/교양과목
+            'ag_crs_strct_cd': self.major_dict[major_name], # 전공 목록
+            'ag_compt_fld_cd': '' # 교양 목록
+            }
 
+        self.major_name_data = list(self.parsing(params))
+
+        print(self.major_name_data)
 
     def parsing(self, params):
 
@@ -178,6 +186,6 @@ class parse_headcount():
 
 
 if __name__ == '__main__':
-    p = parse_headcount()
+    p = parsing_class()
     #p.parsing_all()
     
